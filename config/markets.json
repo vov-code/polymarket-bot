@@ -1,0 +1,22 @@
+﻿[
+  {
+    "id": "example_market_1",
+    "alertThresholdAbs": 0.25,
+    "polymarket": {
+      "slug": "will-example-happen",
+      "selectionMap": {
+        "Yes": "YES",
+        "No": "NO"
+      }
+    },
+    "stake": {
+      "variables": {
+        "slug": "replace-with-stake-fixture-slug"
+      },
+      "selectionMap": {
+        "Team A": "YES",
+        "Team B": "NO"
+      }
+    }
+  }
+]

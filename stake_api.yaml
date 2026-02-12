@@ -1,0 +1,687 @@
+openapi: 3.1.0
+info:
+  version: 1.1.0
+  title: PUBLIC API DOCUMENTATION
+  contact:
+    email: developers@easygo.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  x-logo:
+    url: https://stake-frontend.s3.eu-west-1.amazonaws.com/stake.png
+  description: >
+    <!-- This is an **example** API to demonstrate features of the OpenAPI
+    specification. -->
+
+
+    # Introduction
+
+    This is a public api for authenticated affiliates to use a number of
+    features and query data.
+
+
+    # Authentication
+
+    Requests are authenticated using your stake session token. To find your
+    session token: Open the dev tools on your browser (f12); select the
+    Application tab; then Storage -> Cookies. If you are logged in to the site,
+    your token will be available as the value of the `session` cookie, in the
+    form of a long alphanumeric string.
+
+
+    Include this token in the request under the header "x-access-token".
+servers:
+  - url: https://api.stake.com
+  - url: https://api.stake.us
+  - url: https://gift.stake.us
+  - url: https://tip.stake.com
+paths:
+  /bet/preview:
+    post:
+      tags:
+        - Bet Preview
+      summary: Preview an existing bet
+      description: Query for an existing bet to preview it
+      operationId: BetPreview
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/res_bet_preview'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: InternalServerError
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/req_bet_preview'
+        description: BetId of the bet to be previewed
+        required: true
+  /challenge/list:
+    post:
+      tags:
+        - Challenge List
+      summary: Challenge List
+      description: >-
+        Approved affiliates can query their challenges via the Challenge List
+        API
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/res_challenge_list'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: InternalServerError
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/req_challenge_list'
+        description: The challenge list request query.
+        required: true
+  /crash/history:
+    post:
+      tags:
+        - Crash History
+      summary: Crash History
+      description: Approved affiliates can query the Crash round history via this API.
+      operationId: CrashHistory
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/res_crash_history'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: InternalServerError
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/req_crash_history'
+        description: Crash History Request Body
+        required: true
+  /send/gift:
+    post:
+      tags:
+        - Gift
+      summary: Send Gift
+      description: >-
+        Approved affiliates are able to send other users gifts on Stake via this
+        API
+      operationId: SendGift
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/res_gift'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: InternalServerError
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/req_gift'
+        description: The gift request body.
+        required: true
+  /send/tip:
+    post:
+      tags:
+        - Tip
+      summary: Send tip
+      description: >-
+        Approved affiliates are able to send other users tips on Stake via this
+        API
+      operationId: SendTip
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/res_tip'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: InternalServerError
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/req_tip'
+        description: The tip request body.
+        required: true
+  /slide/history:
+    post:
+      tags:
+        - Slide History
+      summary: Slide History
+      description: Approved affiliates can query Slide result history via this API
+      operationId: SlideHistory
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/res_slide_history'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: NotFound
+        '500':
+          description: InternalServerError
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/req_slide_history'
+        description: Slide History Request Body
+        required: true
+components:
+  schemas:
+    BetID:
+      description: Id of the bet to be queried
+      type: string
+      examples:
+        - 2c075023-b8d7-4fde-9eb9-1f8d71d1abb4
+    req_bet_preview:
+      type: object
+      properties:
+        betId:
+          $ref: '#/components/schemas/BetID'
+    Bet:
+      description: The bet object returned by the API
+      type: object
+      examples:
+        - id: 87f2a1eb-6c20-402e-a5df-328b72f53eda
+          iid: house:1
+          game:
+            active: false
+            amount: 0.01
+            currency: btc
+            id: 87f2a1eb-6c20-402e-a5df-328b72f53eda
+            name: blackjack
+            payout: 0.015
+            payoutMultiplier: 1.5
+          userId: 70856b38-3609-4c48-973e-de46642c2229
+    res_bet_preview:
+      type: object
+      properties:
+        bet:
+          $ref: '#/components/schemas/Bet'
+    ChallengeLimit:
+      description: The number of items to return.
+      type: number
+      examples:
+        - 5
+    ChallengeOffset:
+      description: >-
+        Used for pagination; the number of items to skip before returning the
+        result set.
+      type: number
+      examples:
+        - 1
+    ChallengeSort:
+      description: >-
+        A challenge field to sort results by. Valid values are "startAt",
+        "prize", "wager" & "multiplier".
+      type: string
+      examples:
+        - startAt
+        - prize
+        - wager
+        - multiplier
+    ChallengeType:
+      description: >-
+        The strategy to filter results by. Valid values are "activeCreator",
+        "available", "creator" & "finished".
+      type: string
+      examples:
+        - activeCreator
+        - available
+        - creator
+        - finished
+    req_challenge_list:
+      type: object
+      properties:
+        limit:
+          $ref: '#/components/schemas/ChallengeLimit'
+        offset:
+          $ref: '#/components/schemas/ChallengeOffset'
+        sort:
+          $ref: '#/components/schemas/ChallengeSort'
+        type:
+          $ref: '#/components/schemas/ChallengeType'
+    Challenges:
+      description: The list of challenges returned by the API.
+      type: array
+      examples:
+        - active: false
+          adminCreated: false
+          affiliateUserId: bdc954cd-af50-489c-accb-aae518b4a543
+          award: 1
+          betCurrency: null
+          claimCount: 0
+          claimMax: 1
+          completedAt: null
+          createdAt: 1704240820744
+          creatorUserId: bdc954cd-af50-489c-accb-aae518b4a543
+          currency: btc
+          expireAt: null
+          gameId: 4f37771e-8270-4afb-966c-a6dd8f9c0a6f
+          id: 17d30c9a-cdc4-4acd-8654-2eb0df6ff6e1
+          isRefunded: false
+          minBetUsd: 0.01
+          startAt: 1704240820744
+          targetMultiplier: 100
+          type: casino
+          updatedAt: 1704240820744
+    res_challenge_list:
+      type: object
+      properties:
+        challenges:
+          $ref: '#/components/schemas/Challenges'
+    CrashLimit:
+      description: The number of items to return.
+      type: number
+      examples:
+        - 5
+    CrashOffset:
+      description: The number of items to skip before starting to collect the result set.
+      type: number
+      examples:
+        - 1
+    req_crash_history:
+      type: object
+      properties:
+        limit:
+          $ref: '#/components/schemas/CrashLimit'
+        offset:
+          $ref: '#/components/schemas/CrashOffset'
+    CrashRound:
+      description: A Crash round returned by the API.
+      type: object
+      examples:
+        - crashpoint: 10.586515
+          createdAt: 1704328927635
+          id: 775c48f2-e316-48e8-a745-4359c34baa00
+          iid: 2
+          numbers:
+            - 5.392801453615454
+            - 8.2108481130375
+            - 4.346935571670959
+            - 1
+            - 1.5258943102435094
+            - 1.1853384797298998
+            - 1.7964469761895379
+            - 2.185852738584692
+            - 2.143784329386141
+            - 1.0314811644593755
+            - 1.1103177106192212
+            - 1.6773055302163131
+            - 1.698380168879904
+            - 2.3002596568020888
+            - 1.2479397940896173
+            - 1.0026862070786278
+            - 2.0277176658651346
+            - 10.40277726901491
+            - 2.3708442245604258
+            - 3.0871432179051808
+            - 1.3033866185360008
+            - 706.0787128471707
+            - 1.6877902645954
+            - 2.202452301976919
+            - 1.2062938651959623
+            - 1.846396220375215
+            - 2.4482459273110746
+            - 1.5295066559737382
+            - 1.2561641762751905
+            - 1
+            - 2.292259502215843
+            - 1
+            - 1.232906070304324
+            - 5.971275708014144
+            - 1.1924889855524292
+            - 1.4941736963499166
+            - 2.2475885074678135
+            - 8.134245745484204
+            - 5.738857438708066
+            - 26.961197353002756
+            - 2.8736404304481384
+            - 2.493494755569102
+            - 15.09441565979353
+            - 2.6775453350996212
+            - 2.3803768356430783
+            - 33.71124086887835
+            - 1.209525173031823
+            - 3.416359995337819
+            - 1.2707513109275828
+            - 3.3874829611754183
+            - 2.1764687911136344
+            - 1.4481417195065833
+            - 1.1529539131751547
+            - 1.1782775066699591
+            - 1.7861897223343517
+            - 1.8766220347135283
+            - 707.6065297259712
+            - 2.948896474392164
+            - 2.5971969437691738
+            - 1.9759123433863066
+            - 1.4649534043033918
+            - 1.8989333909715505
+            - 1.4169784027729402
+            - 1.4646459565093297
+            - 1.1069998412870847
+            - 5.925906916909166
+            - 1.1986321584640036
+            - 8.614660989724694
+            - 1.7931245425273803
+            - 2.6496802894622404
+            - 1.8775454029830725
+            - 1.5905574568750442
+            - 1.0843551771255153
+            - 4.918859791881903
+            - 1.90094454507272
+            - 13.373739241446893
+            - 2.1466074991971236
+            - 6.136027453563548
+            - 2.4515053319126823
+            - 1.0605768986492758
+            - 1.4995048823042674
+            - 1.8069831748249154
+            - 1.3671321881613034
+            - 1.2776171106427723
+            - 1.9498622661026255
+            - 1.4458896717822423
+            - 10.805289488324302
+            - 1.4661723734053258
+            - 1.082998217222023
+            - 2.310116297357207
+          seedHashId: 86fa51bf-39a2-49bb-9c39-2616d5431c95
+          startTime: 1704328945663
+          status: ended
+          updatedAt: 1704328927635
+          multiplier: 10.586515
+          elapsed: 0
+    res_crash_history:
+      description: The list of historical Slide round results returned by the API.
+      type: object
+      properties:
+        rounds:
+          type: array
+          items:
+            $ref: '#/components/schemas/CrashRound'
+    GiftUsername:
+      description: username of the user who will receive the gift
+      type: string
+      examples:
+        - brandon
+    GiftAmount:
+      description: >-
+        The gift amount in the chosen currency. Must be an float. Currency must
+        be greater than 0.
+      type: number
+      examples:
+        - 1000
+    GiftCurrency:
+      description: The chosen currency for the gift. Can either be in sweeps or gold.
+      type: string
+      examples:
+        - sweeps
+        - gold
+    req_gift:
+      type: object
+      properties:
+        username:
+          $ref: '#/components/schemas/GiftUsername'
+        amount:
+          $ref: '#/components/schemas/GiftAmount'
+        currency:
+          $ref: '#/components/schemas/GiftCurrency'
+    GiftID:
+      description: The unique ID of the gift record.
+      type: string
+      examples:
+        - 2c075023-b8d7-4fde-9eb9-1f8d71d1abb4
+    GiftUserID:
+      description: Id of the user who will receive the gift
+      type: string
+      examples:
+        - 2c075023-b8d7-4fde-9eb9-1f8d71d1abb4
+    GiftAuthID:
+      description: Id of the user who sent the gift
+      type: string
+      examples:
+        - 2c075023-b8d7-4fde-9eb9-1f8d71d1abb4
+    res_gift:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/GiftID'
+        currency:
+          $ref: '#/components/schemas/GiftCurrency'
+        userId:
+          $ref: '#/components/schemas/GiftUserID'
+        authId:
+          $ref: '#/components/schemas/GiftAuthID'
+    TipUsername:
+      description: username of the user who will receive the tip
+      type: string
+      examples:
+        - brandon
+    TipAmount:
+      description: >-
+        The tip amount in the chosen currency. Must be an float. Currency must
+        be greater than 0.
+      type: number
+      examples:
+        - 0.1
+    TipCurrency:
+      description: The chosen currency for the tip.
+      type: string
+      examples:
+        - btc
+        - ltc
+    req_tip:
+      type: object
+      properties:
+        username:
+          $ref: '#/components/schemas/TipUsername'
+        amount:
+          $ref: '#/components/schemas/TipAmount'
+        currency:
+          $ref: '#/components/schemas/TipCurrency'
+    TipID:
+      description: The unique ID of the tip record.
+      type: string
+      examples:
+        - 2c075023-b8d7-4fde-9eb9-1f8d71d1abb4
+    TipUserID:
+      description: Id of the user who will receive the tip
+      type: string
+      examples:
+        - 2c075023-b8d7-4fde-9eb9-1f8d71d1abb4
+    TipAuthID:
+      description: Id of the user who sent the tip
+      type: string
+      examples:
+        - 2c075023-b8d7-4fde-9eb9-1f8d71d1abb4
+    res_tip:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/TipID'
+        currency:
+          $ref: '#/components/schemas/TipCurrency'
+        userId:
+          $ref: '#/components/schemas/TipUserID'
+        authId:
+          $ref: '#/components/schemas/TipAuthID'
+    SlideLimit:
+      description: The number of items to return.
+      type: number
+      examples:
+        - 5
+    SlideOffset:
+      description: The number of items to skip before starting to collect the result set.
+      type: number
+      examples:
+        - 1
+    req_slide_history:
+      type: object
+      properties:
+        limit:
+          $ref: '#/components/schemas/SlideLimit'
+        offset:
+          $ref: '#/components/schemas/SlideOffset'
+    SlideRound:
+      description: A Slide round returned by the API.
+      type: object
+      examples:
+        - crashpoint: 10.586515
+          createdAt: 1704328927635
+          id: 775c48f2-e316-48e8-a745-4359c34baa00
+          iid: 2
+          numbers:
+            - 5.392801453615454
+            - 8.2108481130375
+            - 4.346935571670959
+            - 1
+            - 1.5258943102435094
+            - 1.1853384797298998
+            - 1.7964469761895379
+            - 2.185852738584692
+            - 2.143784329386141
+            - 1.0314811644593755
+            - 1.1103177106192212
+            - 1.6773055302163131
+            - 1.698380168879904
+            - 2.3002596568020888
+            - 1.2479397940896173
+            - 1.0026862070786278
+            - 2.0277176658651346
+            - 10.40277726901491
+            - 2.3708442245604258
+            - 3.0871432179051808
+            - 1.3033866185360008
+            - 706.0787128471707
+            - 1.6877902645954
+            - 2.202452301976919
+            - 1.2062938651959623
+            - 1.846396220375215
+            - 2.4482459273110746
+            - 1.5295066559737382
+            - 1.2561641762751905
+            - 1
+            - 2.292259502215843
+            - 1
+            - 1.232906070304324
+            - 5.971275708014144
+            - 1.1924889855524292
+            - 1.4941736963499166
+            - 2.2475885074678135
+            - 8.134245745484204
+            - 5.738857438708066
+            - 26.961197353002756
+            - 2.8736404304481384
+            - 2.493494755569102
+            - 15.09441565979353
+            - 2.6775453350996212
+            - 2.3803768356430783
+            - 33.71124086887835
+            - 1.209525173031823
+            - 3.416359995337819
+            - 1.2707513109275828
+            - 3.3874829611754183
+            - 2.1764687911136344
+            - 1.4481417195065833
+            - 1.1529539131751547
+            - 1.1782775066699591
+            - 1.7861897223343517
+            - 1.8766220347135283
+            - 707.6065297259712
+            - 2.948896474392164
+            - 2.5971969437691738
+            - 1.9759123433863066
+            - 1.4649534043033918
+            - 1.8989333909715505
+            - 1.4169784027729402
+            - 1.4646459565093297
+            - 1.1069998412870847
+            - 5.925906916909166
+            - 1.1986321584640036
+            - 8.614660989724694
+            - 1.7931245425273803
+            - 2.6496802894622404
+            - 1.8775454029830725
+            - 1.5905574568750442
+            - 1.0843551771255153
+            - 4.918859791881903
+            - 1.90094454507272
+            - 13.373739241446893
+            - 2.1466074991971236
+            - 6.136027453563548
+            - 2.4515053319126823
+            - 1.0605768986492758
+            - 1.4995048823042674
+            - 1.8069831748249154
+            - 1.3671321881613034
+            - 1.2776171106427723
+            - 1.9498622661026255
+            - 1.4458896717822423
+            - 10.805289488324302
+            - 1.4661723734053258
+            - 1.082998217222023
+            - 2.310116297357207
+          seedHashId: 86fa51bf-39a2-49bb-9c39-2616d5431c95
+          startTime: 1704328945663
+          status: ended
+          updatedAt: 1704328927635
+          multiplier: 10.586515
+          elapsed: 0
+    res_slide_history:
+      description: The list of historical Slide round results returned by the API.
+      type: object
+      properties:
+        rounds:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlideRound'
