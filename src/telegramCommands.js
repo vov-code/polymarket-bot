@@ -63,7 +63,7 @@ const KEY_INFO = {
   },
   POLYMARKET_EVENTS_LIMIT: {
     desc: "Лимит событий за цикл (автоматически урежется, чтобы не упираться по времени/лимитам).",
-    example: "/set POLYMARKET_EVENTS_LIMIT 300"
+    example: "/set POLYMARKET_EVENTS_LIMIT 700"
   },
   POLYMARKET_PAGE_SIZE: {
     desc: "Размер страницы /events.",

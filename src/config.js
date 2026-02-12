@@ -82,7 +82,7 @@ const config = {
   // Polymarket scan
   polymarketBaseUrl: String(process.env.POLYMARKET_BASE_URL || "https://gamma-api.polymarket.com").replace(/\/+$/, ""),
   polymarketCategory: String(process.env.POLYMARKET_CATEGORY || "").trim(),
-  polymarketEventsLimit: readNumber("POLYMARKET_EVENTS_LIMIT", 300),
+  polymarketEventsLimit: readNumber("POLYMARKET_EVENTS_LIMIT", 700),
   polymarketPageSize: readNumber("POLYMARKET_PAGE_SIZE", 50),
   polymarketReqDelayMs: readNumber("POLYMARKET_REQ_DELAY_MS", 500),
   polymarketMaxRetries: readNumber("POLYMARKET_MAX_RETRIES", 5),
