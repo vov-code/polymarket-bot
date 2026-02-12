@@ -1,4 +1,4 @@
-﻿import fs from "node:fs";
+﻿﻿import fs from "node:fs";
 import path from "node:path";
 
 function loadDotEnv(dotEnvPath = ".env") {
@@ -81,7 +81,7 @@ const config = {
 
   // Polymarket scan
   polymarketBaseUrl: String(process.env.POLYMARKET_BASE_URL || "https://gamma-api.polymarket.com").replace(/\/+$/, ""),
-  polymarketCategory: process.env.POLYMARKET_CATEGORY || "Sports",
+  polymarketCategory: process.env.POLYMARKET_CATEGORY || "",
   polymarketEventsLimit: readNumber("POLYMARKET_EVENTS_LIMIT", 300),
   polymarketPageSize: readNumber("POLYMARKET_PAGE_SIZE", 50),
   polymarketReqDelayMs: readNumber("POLYMARKET_REQ_DELAY_MS", 500),

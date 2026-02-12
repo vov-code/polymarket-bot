@@ -1,4 +1,4 @@
-﻿import { fetchJson } from "../http.js";
+﻿﻿import { fetchJson } from "../http.js";
 
 import { HttpError } from "../http.js";
 
@@ -245,9 +245,10 @@ export async function getPolymarketMarkets(config) {
 
   for (let offset = 0; offset < limit; offset += pageSize) {
     const batchLimit = Math.min(pageSize, limit - offset);
-    const url = `${config.polymarketBaseUrl}/events?active=true&closed=false&category=${encodeURIComponent(
-      config.polymarketCategory
-    )}&limit=${batchLimit}&offset=${offset}`;
+    let url = `${config.polymarketBaseUrl}/events?active=true&closed=false&limit=${batchLimit}&offset=${offset}`;
+    if (config.polymarketCategory) {
+      url += `&category=${encodeURIComponent(config.polymarketCategory)}`;
+    }
 
     const events = await fetchGammaJson(url, config);
 

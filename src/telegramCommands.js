@@ -57,7 +57,7 @@ const KEY_INFO = {
     example: "/set POLYMARKET_BASE_URL https://gamma-api.polymarket.com"
   },
   POLYMARKET_CATEGORY: {
-    desc: "Категория событий Polymarket (например Sports, Politics).",
+    desc: "Категория событий Polymarket (например Sports, Politics). Оставьте пустым для всех.",
     example: "/set POLYMARKET_CATEGORY Sports"
   },
   POLYMARKET_EVENTS_LIMIT: {
@@ -234,7 +234,7 @@ function formatMainSettings(config) {
   const lines = [];
   lines.push("Главное:");
   lines.push(`⏱ Скан: каждые ${Math.round(Number(config.pollIntervalMs || 0) / 1000)} сек`);
-  lines.push(`🏷 Категория: ${String(config.polymarketCategory || "")}`);
+  lines.push(`🏷 Категория: ${String(config.polymarketCategory || "All")}`);
   lines.push(`🛰 Прокси: ${config.proxyUrl ? `настроен (fallback) ${maskProxyUrl(config.proxyUrl)}` : "выкл"}`);
 
   const vOn = config.enableVolumeSpike ? "вкл" : "выкл";
@@ -477,7 +477,7 @@ export async function pollTelegramCommands(config, state, defaults) {
 
     try {
       if (cmd === "/help" || cmd === "/start") {
-        await sendTelegram(config, formatHelp());
+        await sendTelegram(config, formatHelp(config));
         continue;
       }
 
