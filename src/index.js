@@ -116,12 +116,18 @@ async function runOnce(state) {
     if (isNew) {
       newMarketsSeen += 1;
     }
+
+    // Check if market is actually new (created recently), not just new to our state
+    const createdTs = market.createdAt ? new Date(market.createdAt).getTime() : 0;
+    const ageHours = createdTs > 0 ? (nowTs - createdTs) / 3_600_000 : 999;
+
     if (
       config.enableNewMarket &&
       isBootstrapped &&
       isNew &&
       market.volumeUsd >= config.newMarketMinVolumeUsd &&
-      market.liquidityUsd >= config.newMarketMinLiquidityUsd
+      market.liquidityUsd >= config.newMarketMinLiquidityUsd &&
+      ageHours <= config.newMarketMaxAgeHours
     ) {
       signals.push({
         marketId: market.id,

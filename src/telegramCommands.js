@@ -128,6 +128,10 @@ const KEY_INFO = {
     desc: "New Market: мин. ликвидность, чтобы алертить рынок при первом появлении.",
     example: "/set NEW_MARKET_MIN_LIQUIDITY_USD 0"
   },
+  NEW_MARKET_MAX_AGE_HOURS: {
+    desc: "New Market: игнорировать рынки, созданные более N часов назад (защита от спама старыми рынками).",
+    example: "/set NEW_MARKET_MAX_AGE_HOURS 6"
+  },
   STATE_RETENTION_MINUTES: {
     desc: "Сколько минут хранить историю сэмплов в state (влияет на размер state.json).",
     example: "/set STATE_RETENTION_MINUTES 180"
@@ -169,7 +173,8 @@ const GROUPS = [
       "PRICE_MOVE_ABS_10M",
       "ENABLE_NEW_MARKET",
       "NEW_MARKET_MIN_VOLUME_USD",
-      "NEW_MARKET_MIN_LIQUIDITY_USD"
+      "NEW_MARKET_MIN_LIQUIDITY_USD",
+      "NEW_MARKET_MAX_AGE_HOURS"
     ]
   },
   { title: "State/Debug", keys: ["STATE_RETENTION_MINUTES", "DEBUG"] }
@@ -249,7 +254,7 @@ function formatMainSettings(config) {
   lines.push(
     `🐳 Big move: +$${config.bigBuyVolumeUsd10m} за 10м и >=${Math.round(config.bigBuyMinPctOfTotal10m * 1000) / 10}% от total, price >=${Math.round(config.priceMoveAbs10m * 1000) / 10}pp`
   );
-  lines.push(`🆕 New market: volume >=$${config.newMarketMinVolumeUsd}, liq >=$${config.newMarketMinLiquidityUsd}`);
+  lines.push(`🆕 New market: volume >=$${config.newMarketMinVolumeUsd}, age <=${config.newMarketMaxAgeHours}h`);
   return lines.join("\n");
 }
 
@@ -336,7 +341,6 @@ function formatCfg(config, runtime) {
 }
 
 function formatHelp(config) {
-  if (!config) return "⚠️ Config is missing";
   const lines = [];
   lines.push("Команды:");
   lines.push("/config показать текущие настройки");

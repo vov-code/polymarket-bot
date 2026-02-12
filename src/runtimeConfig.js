@@ -27,6 +27,7 @@ export const CONFIG_KEYS = [
   "PRICE_MOVE_ABS_10M",
   "NEW_MARKET_MIN_VOLUME_USD",
   "NEW_MARKET_MIN_LIQUIDITY_USD",
+  "NEW_MARKET_MAX_AGE_HOURS",
   "STATE_RETENTION_MINUTES",
   "DEBUG"
 ];
@@ -213,6 +214,9 @@ function applyNumber(config, key, num) {
     case "NEW_MARKET_MIN_LIQUIDITY_USD":
       config.newMarketMinLiquidityUsd = Math.max(0, num);
       return;
+    case "NEW_MARKET_MAX_AGE_HOURS":
+      config.newMarketMaxAgeHours = Math.max(0, num);
+      return;
     case "STATE_RETENTION_MINUTES":
       config.stateRetentionMinutes = Math.max(10, Math.floor(num));
       return;
@@ -280,6 +284,8 @@ export function getEffectiveValue(config, key) {
       return config.newMarketMinVolumeUsd;
     case "NEW_MARKET_MIN_LIQUIDITY_USD":
       return config.newMarketMinLiquidityUsd;
+    case "NEW_MARKET_MAX_AGE_HOURS":
+      return config.newMarketMaxAgeHours;
     case "STATE_RETENTION_MINUTES":
       return config.stateRetentionMinutes;
     case "DEBUG":
