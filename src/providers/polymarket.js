@@ -211,6 +211,7 @@ function toMarket(event, market, config) {
     return null;
   }
 
+  const createdAt = market.createdAt || market.creationDate || "";
   return {
     source: "polymarket",
     id,
@@ -220,7 +221,8 @@ function toMarket(event, market, config) {
     url: market.slug ? `https://polymarket.com/market/${market.slug}` : "",
     startDate: market.startDate || event.startDate || "",
     endDate,
-    createdAt: market.createdAt || market.creationDate || "",
+    createdAt,
+    createdAtTs: createdAt ? new Date(createdAt).getTime() : 0,
     liquidityUsd: liquidity,
     volumeUsd: Number.isFinite(volumeUsd) ? volumeUsd : 0,
     outcomes

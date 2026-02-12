@@ -1,4 +1,5 @@
 import { fetchJson, HttpError } from "./http.js";
+import os from "node:os";
 import {
   CONFIG_KEYS,
   SENSITIVE_KEYS,
@@ -122,7 +123,7 @@ const KEY_INFO = {
   },
   NEW_MARKET_MIN_VOLUME_USD: {
     desc: "New Market: мин. объем, чтобы алертить рынок при первом появлении.",
-    example: "/set NEW_MARKET_MIN_VOLUME_USD 20000"
+    example: "/set NEW_MARKET_MIN_VOLUME_USD 5000"
   },
   NEW_MARKET_MIN_LIQUIDITY_USD: {
     desc: "New Market: мин. ликвидность, чтобы алертить рынок при первом появлении.",
@@ -341,7 +342,9 @@ function formatCfg(config, runtime) {
 }
 
 function formatHelp(config) {
+  if (!config) return "⚠️ Config is missing";
   const lines = [];
+  lines.push(`🤖 Host: ${os.hostname()}`);
   lines.push("Команды:");
   lines.push("/config показать текущие настройки");
   lines.push("/status статус и ошибки");
@@ -621,7 +624,7 @@ export async function pollTelegramCommands(config, state, defaults) {
             BIG_BUY_USD_10M: 10000,
             BIG_BUY_MIN_PCT_TOTAL_10M: 0.02,
             PRICE_MOVE_ABS_10M: 0.1,
-            NEW_MARKET_MIN_VOLUME_USD: 50000,
+            NEW_MARKET_MIN_VOLUME_USD: 5000,
             MAX_ALERTS_PER_CYCLE: 6
           },
           balanced: {
@@ -630,16 +633,18 @@ export async function pollTelegramCommands(config, state, defaults) {
             BIG_BUY_USD_10M: 5000,
             BIG_BUY_MIN_PCT_TOTAL_10M: 0.01,
             PRICE_MOVE_ABS_10M: 0.08,
-            NEW_MARKET_MIN_VOLUME_USD: 20000,
+            NEW_MARKET_MIN_VOLUME_USD: 1000,
             MAX_ALERTS_PER_CYCLE: 10
           },
           aggressive: {
+            POLL_INTERVAL_MS: 3000,
+            POLYMARKET_REQ_DELAY_MS: 100,
             VOLUME_SPIKE_USD_30M: 2500,
             VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.01,
             BIG_BUY_USD_10M: 2500,
             BIG_BUY_MIN_PCT_TOTAL_10M: 0.01,
             PRICE_MOVE_ABS_10M: 0.06,
-            NEW_MARKET_MIN_VOLUME_USD: 10000,
+            NEW_MARKET_MIN_VOLUME_USD: 5000,
             MAX_ALERTS_PER_CYCLE: 15
           }
         };

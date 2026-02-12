@@ -118,13 +118,16 @@ async function runOnce(state) {
     }
 
     // Check if market is actually new (created recently), not just new to our state
-    const createdTs = market.createdAt ? new Date(market.createdAt).getTime() : 0;
+    const createdTs = market.createdAtTs || 0;
     const ageHours = createdTs > 0 ? (nowTs - createdTs) / 3_600_000 : 999;
+
+    const entry = state.markets[market.id];
+    const hasAlerted = entry?.alerts?.["new_market"];
 
     if (
       config.enableNewMarket &&
       isBootstrapped &&
-      isNew &&
+      !hasAlerted &&
       market.volumeUsd >= config.newMarketMinVolumeUsd &&
       market.liquidityUsd >= config.newMarketMinLiquidityUsd &&
       ageHours <= config.newMarketMaxAgeHours

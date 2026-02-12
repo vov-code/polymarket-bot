@@ -68,7 +68,9 @@ export function upsertMarketSample(state, market, nowTs, retentionMs) {
   entry.samples.push({ t: nowTs, volumeUsd: market.volumeUsd, prices });
 
   const cutoff = nowTs - retentionMs;
-  entry.samples = entry.samples.filter((s) => typeof s.t === "number" && s.t >= cutoff);
+  while (entry.samples.length > 0 && entry.samples[0].t < cutoff) {
+    entry.samples.shift();
+  }
 
   return isNew;
 }

@@ -101,7 +101,7 @@ const config = {
   priceMoveAbs10m: readNumber("PRICE_MOVE_ABS_10M", 0.08),
 
   // New market alert
-  newMarketMinVolumeUsd: readNumber("NEW_MARKET_MIN_VOLUME_USD", 20000),
+  newMarketMinVolumeUsd: readNumber("NEW_MARKET_MIN_VOLUME_USD", 5000),
   newMarketMinLiquidityUsd: readNumber("NEW_MARKET_MIN_LIQUIDITY_USD", 0),
   newMarketMaxAgeHours: readNumber("NEW_MARKET_MAX_AGE_HOURS", 6),
 
