@@ -231,6 +231,7 @@ function formatValue(key, value) {
 }
 
 function formatMainSettings(config) {
+  if (!config) return "⚠️ Config is missing";
   const lines = [];
   lines.push("Главное:");
   lines.push(`⏱ Скан: каждые ${Math.round(Number(config.pollIntervalMs || 0) / 1000)} сек`);
@@ -335,6 +336,7 @@ function formatCfg(config, runtime) {
 }
 
 function formatHelp(config) {
+  if (!config) return "⚠️ Config is missing";
   const lines = [];
   lines.push("Команды:");
   lines.push("/config показать текущие настройки");
