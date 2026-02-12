@@ -1,4 +1,4 @@
-﻿function normalizeOutcomeKey(name) {
+﻿﻿function normalizeOutcomeKey(name) {
   return String(name || "")
     .toLowerCase()
     .replace(/\s+/g, " ")
@@ -31,7 +31,10 @@ function computeMaxPriceMove(current, past) {
 
     const delta = currPrice - prevPrice;
     const abs = Math.abs(delta);
-    if (!best || abs > best.absDelta) {
+    
+    // Если движения равны по силе (например Yes +0.10, No -0.10),
+    // отдаем приоритет тому, что выросло (delta > 0), так как это цель покупки.
+    if (!best || abs > best.absDelta || (Math.abs(abs - best.absDelta) < 1e-9 && delta > best.delta)) {
       best = { key, delta, absDelta: abs, prevPrice, currPrice };
     }
   }
@@ -78,7 +81,7 @@ export function upsertMarketSample(state, market, nowTs, retentionMs) {
 export function computeSignalsForMarket(entry, nowTs, config) {
   const samples = entry.samples || [];
   if (samples.length < 2) {
-    return { volumeSpike: null, bigBuy: null };
+    return { volumeSpike: null, bigBuy: null, priceChange: null };
   }
 
   const current = samples[samples.length - 1];
@@ -99,17 +102,23 @@ export function computeSignalsForMarket(entry, nowTs, config) {
       delta >= config.volumeSpikeUsd30m &&
       pctOfTotal >= config.volumeSpikeMinPctOfTotal30m
     ) {
+      const move = computeMaxPriceMove(current, thirtyMinAgo);
       volumeSpike = {
         deltaUsd: delta,
         pctOfTotal,
         fromTs: thirtyMinAgo.t,
         fromVolumeUsd,
-        toVolumeUsd
+        toVolumeUsd,
+        outcomeKey: move ? move.key : null,
+        deltaPrice: move ? move.delta : 0,
+        prevPrice: move ? move.prevPrice : 0,
+        currPrice: move ? move.currPrice : 0
       };
     }
   }
 
   let bigBuy = null;
+  let priceChange = null;
   if (tenMinAgo && nowTs - tenMinAgo.t <= 10 * 60_000 + tolMs) {
     const fromVolumeUsd = Number(tenMinAgo.volumeUsd || 0);
     const toVolumeUsd = Number(current.volumeUsd || 0);
@@ -136,9 +145,24 @@ export function computeSignalsForMarket(entry, nowTs, config) {
         fromTs: tenMinAgo.t
       };
     }
+
+    if (
+      config.enablePriceChange &&
+      move &&
+      move.absDelta >= config.priceChangeAbs10m &&
+      volDelta >= config.priceChangeMinVolumeUsd10m
+    ) {
+      priceChange = {
+        outcomeKey: move.key,
+        deltaPrice: move.delta,
+        prevPrice: move.prevPrice,
+        currPrice: move.currPrice,
+        volumeDeltaUsd: volDelta
+      };
+    }
   }
 
-  return { volumeSpike, bigBuy };
+  return { volumeSpike, bigBuy, priceChange };
 }
 
 export function shouldSendAlert(entry, alertKey, nowTs, cooldownMs) {

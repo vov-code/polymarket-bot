@@ -20,6 +20,7 @@ export const CONFIG_KEYS = [
   "ENABLE_VOLUME_SPIKE",
   "ENABLE_BIG_BUY",
   "ENABLE_NEW_MARKET",
+  "ENABLE_PRICE_CHANGE",
   "VOLUME_SPIKE_USD_30M",
   "VOLUME_SPIKE_MIN_PCT_TOTAL_30M",
   "BIG_BUY_USD_10M",
@@ -28,6 +29,8 @@ export const CONFIG_KEYS = [
   "NEW_MARKET_MIN_VOLUME_USD",
   "NEW_MARKET_MIN_LIQUIDITY_USD",
   "NEW_MARKET_MAX_AGE_HOURS",
+  "PRICE_CHANGE_ABS_10M",
+  "PRICE_CHANGE_MIN_VOLUME_USD_10M",
   "STATE_RETENTION_MINUTES",
   "DEBUG"
 ];
@@ -35,7 +38,7 @@ export const CONFIG_KEYS = [
 const KEY_SET = new Set(CONFIG_KEYS);
 
 export const SENSITIVE_KEYS = new Set(["PROXY_URL"]);
-const BOOLEAN_KEYS = new Set(["DEBUG", "ENABLE_VOLUME_SPIKE", "ENABLE_BIG_BUY", "ENABLE_NEW_MARKET"]);
+const BOOLEAN_KEYS = new Set(["DEBUG", "ENABLE_VOLUME_SPIKE", "ENABLE_BIG_BUY", "ENABLE_NEW_MARKET", "ENABLE_PRICE_CHANGE"]);
 
 export function loadRuntimeConfig(filePath) {
   const resolved = path.resolve(process.cwd(), filePath);
@@ -150,6 +153,9 @@ function applyBoolean(config, key, bool) {
     case "ENABLE_NEW_MARKET":
       config.enableNewMarket = bool;
       return;
+    case "ENABLE_PRICE_CHANGE":
+      config.enablePriceChange = bool;
+      return;
     default:
       throw new Error("unsupported key");
   }
@@ -216,6 +222,12 @@ function applyNumber(config, key, num) {
       return;
     case "NEW_MARKET_MAX_AGE_HOURS":
       config.newMarketMaxAgeHours = Math.max(0, num);
+      return;
+    case "PRICE_CHANGE_ABS_10M":
+      config.priceChangeAbs10m = clamp01(num);
+      return;
+    case "PRICE_CHANGE_MIN_VOLUME_USD_10M":
+      config.priceChangeMinVolumeUsd10m = Math.max(0, num);
       return;
     case "STATE_RETENTION_MINUTES":
       config.stateRetentionMinutes = Math.max(10, Math.floor(num));
@@ -286,6 +298,12 @@ export function getEffectiveValue(config, key) {
       return config.newMarketMinLiquidityUsd;
     case "NEW_MARKET_MAX_AGE_HOURS":
       return config.newMarketMaxAgeHours;
+    case "ENABLE_PRICE_CHANGE":
+      return config.enablePriceChange;
+    case "PRICE_CHANGE_ABS_10M":
+      return config.priceChangeAbs10m;
+    case "PRICE_CHANGE_MIN_VOLUME_USD_10M":
+      return config.priceChangeMinVolumeUsd10m;
     case "STATE_RETENTION_MINUTES":
       return config.stateRetentionMinutes;
     case "DEBUG":

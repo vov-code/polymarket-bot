@@ -18,8 +18,8 @@ const COMMANDS = [
   { command: "set", description: "Изменить настройку: /set KEY VALUE" },
   { command: "unset", description: "Убрать override: /unset KEY" },
   { command: "preset", description: "Готовые пресеты: conservative|balanced|aggressive" },
-  { command: "on", description: "Включить сигналы: volume|bigbuy|new|all" },
-  { command: "off", description: "Выключить сигналы: volume|bigbuy|new|all" },
+  { command: "on", description: "Включить сигналы: volume|bigbuy|new|price|all" },
+  { command: "off", description: "Выключить сигналы: volume|bigbuy|new|price|all" },
   { command: "overrides", description: "Показать только overrides" },
   { command: "desc", description: "Описание ключа: /desc KEY" },
   { command: "get", description: "Показать значение: /get KEY" },
@@ -101,9 +101,13 @@ const KEY_INFO = {
     desc: "Вкл/выкл алерт по новым рынкам с большим объемом.",
     example: "/set ENABLE_NEW_MARKET true"
   },
+  ENABLE_PRICE_CHANGE: {
+    desc: "Вкл/выкл алерт по резкому изменению цены (Price Pump).",
+    example: "/set ENABLE_PRICE_CHANGE true"
+  },
   VOLUME_SPIKE_USD_30M: {
     desc: "Volume Spike: прирост объема за 30 минут (USD).",
-    example: "/set VOLUME_SPIKE_USD_30M 5000"
+    example: "/set VOLUME_SPIKE_USD_30M 100000"
   },
   VOLUME_SPIKE_MIN_PCT_TOTAL_30M: {
     desc: "Volume Spike: минимальная доля прироста от общего объема (0.01 = 1%).",
@@ -111,7 +115,7 @@ const KEY_INFO = {
   },
   BIG_BUY_USD_10M: {
     desc: "Big Move: прирост объема за 10 минут (USD).",
-    example: "/set BIG_BUY_USD_10M 5000"
+    example: "/set BIG_BUY_USD_10M 100000"
   },
   BIG_BUY_MIN_PCT_TOTAL_10M: {
     desc: "Big Move: минимальная доля прироста от общего объема (0.01 = 1%).",
@@ -123,7 +127,7 @@ const KEY_INFO = {
   },
   NEW_MARKET_MIN_VOLUME_USD: {
     desc: "New Market: мин. объем, чтобы алертить рынок при первом появлении.",
-    example: "/set NEW_MARKET_MIN_VOLUME_USD 5000"
+    example: "/set NEW_MARKET_MIN_VOLUME_USD 100000"
   },
   NEW_MARKET_MIN_LIQUIDITY_USD: {
     desc: "New Market: мин. ликвидность, чтобы алертить рынок при первом появлении.",
@@ -132,6 +136,14 @@ const KEY_INFO = {
   NEW_MARKET_MAX_AGE_HOURS: {
     desc: "New Market: игнорировать рынки, созданные более N часов назад (защита от спама старыми рынками).",
     example: "/set NEW_MARKET_MAX_AGE_HOURS 6"
+  },
+  PRICE_CHANGE_ABS_10M: {
+    desc: "Price Pump: изменение цены за 10 минут (0.15 = 15%).",
+    example: "/set PRICE_CHANGE_ABS_10M 0.15"
+  },
+  PRICE_CHANGE_MIN_VOLUME_USD_10M: {
+    desc: "Price Pump: мин. объем за 10 минут для подтверждения цены (фильтр шума).",
+    example: "/set PRICE_CHANGE_MIN_VOLUME_USD_10M 1000"
   },
   STATE_RETENTION_MINUTES: {
     desc: "Сколько минут хранить историю сэмплов в state (влияет на размер state.json).",
@@ -175,7 +187,10 @@ const GROUPS = [
       "ENABLE_NEW_MARKET",
       "NEW_MARKET_MIN_VOLUME_USD",
       "NEW_MARKET_MIN_LIQUIDITY_USD",
-      "NEW_MARKET_MAX_AGE_HOURS"
+      "NEW_MARKET_MAX_AGE_HOURS",
+      "ENABLE_PRICE_CHANGE",
+      "PRICE_CHANGE_ABS_10M",
+      "PRICE_CHANGE_MIN_VOLUME_USD_10M"
     ]
   },
   { title: "State/Debug", keys: ["STATE_RETENTION_MINUTES", "DEBUG"] }
@@ -247,7 +262,8 @@ function formatMainSettings(config) {
   const vOn = config.enableVolumeSpike ? "вкл" : "выкл";
   const bOn = config.enableBigBuy ? "вкл" : "выкл";
   const nOn = config.enableNewMarket ? "вкл" : "выкл";
-  lines.push(`📡 Сигналы: volume=${vOn}, bigbuy=${bOn}, new=${nOn}`);
+  const pOn = config.enablePriceChange ? "вкл" : "выкл";
+  lines.push(`📡 Сигналы: volume=${vOn}, bigbuy=${bOn}, new=${nOn}, price=${pOn}`);
 
   lines.push(
     `🔥 Volume spike: +$${config.volumeSpikeUsd30m} за 30м и >=${Math.round(config.volumeSpikeMinPctOfTotal30m * 1000) / 10}% от total`
@@ -256,6 +272,7 @@ function formatMainSettings(config) {
     `🐳 Big move: +$${config.bigBuyVolumeUsd10m} за 10м и >=${Math.round(config.bigBuyMinPctOfTotal10m * 1000) / 10}% от total, price >=${Math.round(config.priceMoveAbs10m * 1000) / 10}pp`
   );
   lines.push(`🆕 New market: volume >=$${config.newMarketMinVolumeUsd}, age <=${config.newMarketMaxAgeHours}h`);
+  lines.push(`🚀 Price pump: change >=${Math.round(config.priceChangeAbs10m * 100)}% за 10м (vol >=$${config.priceChangeMinVolumeUsd10m})`);
   return lines.join("\n");
 }
 
@@ -353,8 +370,8 @@ function formatHelp(config) {
   lines.push("/unset KEY вернуть дефолт");
   lines.push("/overrides только overrides");
   lines.push("/desc KEY что значит ключ");
-  lines.push("/on volume|bigbuy|new|all включить сигналы");
-  lines.push("/off volume|bigbuy|new|all выключить сигналы");
+  lines.push("/on volume|bigbuy|new|price|all включить сигналы");
+  lines.push("/off volume|bigbuy|new|price|all выключить сигналы");
   lines.push("/whoami показать chat_id и user_id");
   lines.push("");
   lines.push("Текущие главные настройки:");
@@ -619,33 +636,36 @@ export async function pollTelegramCommands(config, state, defaults) {
         const name = String(parts[1] || "").trim().toLowerCase();
         const presets = {
           conservative: {
-            VOLUME_SPIKE_USD_30M: 10000,
+            VOLUME_SPIKE_USD_30M: 200000,
             VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.02,
-            BIG_BUY_USD_10M: 10000,
+            BIG_BUY_USD_10M: 200000,
             BIG_BUY_MIN_PCT_TOTAL_10M: 0.02,
             PRICE_MOVE_ABS_10M: 0.1,
-            NEW_MARKET_MIN_VOLUME_USD: 5000,
-            MAX_ALERTS_PER_CYCLE: 6
+            NEW_MARKET_MIN_VOLUME_USD: 200000,
+            MAX_ALERTS_PER_CYCLE: 6,
+            PRICE_CHANGE_ABS_10M: 0.20
           },
           balanced: {
-            VOLUME_SPIKE_USD_30M: 5000,
+            VOLUME_SPIKE_USD_30M: 100000,
             VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.01,
-            BIG_BUY_USD_10M: 5000,
+            BIG_BUY_USD_10M: 100000,
             BIG_BUY_MIN_PCT_TOTAL_10M: 0.01,
             PRICE_MOVE_ABS_10M: 0.08,
-            NEW_MARKET_MIN_VOLUME_USD: 1000,
-            MAX_ALERTS_PER_CYCLE: 10
+            NEW_MARKET_MIN_VOLUME_USD: 100000,
+            MAX_ALERTS_PER_CYCLE: 10,
+            PRICE_CHANGE_ABS_10M: 0.15
           },
           aggressive: {
             POLL_INTERVAL_MS: 3000,
             POLYMARKET_REQ_DELAY_MS: 100,
-            VOLUME_SPIKE_USD_30M: 2500,
+            VOLUME_SPIKE_USD_30M: 50000,
             VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.01,
-            BIG_BUY_USD_10M: 2500,
+            BIG_BUY_USD_10M: 50000,
             BIG_BUY_MIN_PCT_TOTAL_10M: 0.01,
             PRICE_MOVE_ABS_10M: 0.06,
-            NEW_MARKET_MIN_VOLUME_USD: 5000,
-            MAX_ALERTS_PER_CYCLE: 15
+            NEW_MARKET_MIN_VOLUME_USD: 50000,
+            MAX_ALERTS_PER_CYCLE: 15,
+            PRICE_CHANGE_ABS_10M: 0.10
           }
         };
 
@@ -672,15 +692,15 @@ export async function pollTelegramCommands(config, state, defaults) {
       if (cmd === "/on" || cmd === "/off") {
         const mode = cmd === "/on";
         const target = String(parts[1] || "").trim().toLowerCase();
-        const map = { volume: "ENABLE_VOLUME_SPIKE", bigbuy: "ENABLE_BIG_BUY", new: "ENABLE_NEW_MARKET" };
+        const map = { volume: "ENABLE_VOLUME_SPIKE", bigbuy: "ENABLE_BIG_BUY", new: "ENABLE_NEW_MARKET", price: "ENABLE_PRICE_CHANGE" };
         const keys =
           target === "all"
-            ? ["ENABLE_VOLUME_SPIKE", "ENABLE_BIG_BUY", "ENABLE_NEW_MARKET"]
+            ? ["ENABLE_VOLUME_SPIKE", "ENABLE_BIG_BUY", "ENABLE_NEW_MARKET", "ENABLE_PRICE_CHANGE"]
             : map[target]
               ? [map[target]]
               : [];
         if (keys.length === 0) {
-          throw new Error("usage: /on volume|bigbuy|new|all  OR  /off volume|bigbuy|new|all");
+          throw new Error("usage: /on volume|bigbuy|new|price|all");
         }
         for (const k of keys) {
           const parsedValue = parseAndApply(config, k, mode ? "true" : "false");

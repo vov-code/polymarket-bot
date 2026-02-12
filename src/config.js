@@ -1,4 +1,4 @@
-﻿﻿import fs from "node:fs";
+﻿﻿﻿﻿import fs from "node:fs";
 import path from "node:path";
 
 function loadDotEnv(dotEnvPath = ".env") {
@@ -94,14 +94,17 @@ const config = {
   enableVolumeSpike: readBoolean("ENABLE_VOLUME_SPIKE", true),
   enableBigBuy: readBoolean("ENABLE_BIG_BUY", true),
   enableNewMarket: readBoolean("ENABLE_NEW_MARKET", true),
-  volumeSpikeUsd30m: readNumber("VOLUME_SPIKE_USD_30M", 5000),
+  volumeSpikeUsd30m: readNumber("VOLUME_SPIKE_USD_30M", 100000),
   volumeSpikeMinPctOfTotal30m: readNumber("VOLUME_SPIKE_MIN_PCT_TOTAL_30M", 0.01),
-  bigBuyVolumeUsd10m: readNumber("BIG_BUY_USD_10M", 5000),
+  bigBuyVolumeUsd10m: readNumber("BIG_BUY_USD_10M", 100000),
   bigBuyMinPctOfTotal10m: readNumber("BIG_BUY_MIN_PCT_TOTAL_10M", 0.01),
   priceMoveAbs10m: readNumber("PRICE_MOVE_ABS_10M", 0.08),
+  enablePriceChange: readBoolean("ENABLE_PRICE_CHANGE", true),
+  priceChangeAbs10m: readNumber("PRICE_CHANGE_ABS_10M", 0.15),
+  priceChangeMinVolumeUsd10m: readNumber("PRICE_CHANGE_MIN_VOLUME_USD_10M", 1000),
 
   // New market alert
-  newMarketMinVolumeUsd: readNumber("NEW_MARKET_MIN_VOLUME_USD", 5000),
+  newMarketMinVolumeUsd: readNumber("NEW_MARKET_MIN_VOLUME_USD", 100000),
   newMarketMinLiquidityUsd: readNumber("NEW_MARKET_MIN_LIQUIDITY_USD", 0),
   newMarketMaxAgeHours: readNumber("NEW_MARKET_MAX_AGE_HOURS", 6),
 

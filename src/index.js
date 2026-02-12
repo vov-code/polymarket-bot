@@ -1,4 +1,4 @@
-﻿import config from "./config.js";
+﻿﻿import config from "./config.js";
 import http from "node:http";
 import { initHttp, fetchJson } from "./http.js";
 import { getPolymarketMarkets } from "./providers/polymarket.js";
@@ -66,6 +66,8 @@ function buildAlertText(meta, signal) {
       ? "🔥 Volume spike"
       : signal.kind === "big_buy"
         ? "🐳 Big move"
+        : signal.kind === "price_change"
+          ? "🚀 Price Pump"
         : signal.kind === "new_market"
           ? "🆕 New market"
           : "Polymarket signal";
@@ -79,6 +81,12 @@ function buildAlertText(meta, signal) {
     lines.push(
       `💰 Volume (30m): $${formatMoney(signal.fromVolumeUsd)} -> $${formatMoney(signal.toVolumeUsd)} (+$${formatMoney(signal.deltaUsd)}, ${formatPct01(signal.pctOfTotal, 1)} of total)`
     );
+    if (signal.outcomeKey) {
+      const up = signal.deltaPrice > 0;
+      const arrow = up ? "📈" : "📉";
+      const pp = round(Math.abs(signal.deltaPrice) * 100, 1);
+      lines.push(`🎯 Outcome: ${signal.outcomeKey} (${arrow} ${pp}pp)`);
+    }
   }
 
   if (signal.kind === "big_buy") {
@@ -90,6 +98,14 @@ function buildAlertText(meta, signal) {
     lines.push(
       `💰 Volume (10m): $${formatMoney(signal.fromVolumeUsd)} -> $${formatMoney(signal.toVolumeUsd)} (+$${formatMoney(signal.volumeDeltaUsd)}, ${formatPct01(signal.pctOfTotal, 1)} of total)`
     );
+  }
+
+  if (signal.kind === "price_change") {
+    const up = signal.deltaPrice > 0;
+    const arrow = up ? "🚀" : "🔻";
+    const pp = round(Math.abs(signal.deltaPrice) * 100, 1);
+    lines.push(`🎯 Outcome: ${signal.outcomeKey}`);
+    lines.push(`Price (10m): ${formatProb(signal.prevPrice)} -> ${formatProb(signal.currPrice)} (${arrow} ${pp}pp)`);
   }
 
   if (signal.kind === "new_market") {
@@ -168,6 +184,14 @@ async function runOnce(state) {
         ...computed.bigBuy
       });
     }
+
+    if (config.enablePriceChange && computed.priceChange) {
+      signals.push({
+        marketId: market.id,
+        kind: "price_change",
+        ...computed.priceChange
+      });
+    }
   }
 
   for (const s of signals) {
@@ -178,6 +202,8 @@ async function runOnce(state) {
       s.score = s.deltaUsd;
     } else if (s.kind === "big_buy") {
       s.score = s.volumeDeltaUsd;
+    } else if (s.kind === "price_change") {
+      s.score = Math.abs(s.deltaPrice) * 100000; // High score for price moves
     } else if (s.kind === "new_market") {
       s.score = s.volumeUsd;
     } else {
@@ -200,7 +226,12 @@ async function runOnce(state) {
       continue;
     }
 
-    const alertKey = signal.kind === "big_buy" ? `big_buy:${signal.outcomeKey}` : `${signal.kind}`;
+    let alertKey = signal.kind;
+    if (signal.kind === "big_buy" || signal.kind === "price_change") {
+      // Unique alert per outcome to avoid spamming same move
+      alertKey = `${signal.kind}:${signal.outcomeKey}`;
+    }
+
     if (!shouldSendAlert(entry, alertKey, nowTs, config.alertCooldownMs)) {
       continue;
     }
