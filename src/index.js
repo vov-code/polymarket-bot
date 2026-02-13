@@ -131,7 +131,7 @@ async function runOnce(state, keepAlive) {
   for (const market of markets) {
     // Yield to command polling every 1000 markets to stay responsive during heavy CPU loops
     loopCount++;
-    if (keepAlive && loopCount % 1000 === 0) {
+    if (keepAlive && loopCount % 5000 === 0) {
       await keepAlive();
     }
 
