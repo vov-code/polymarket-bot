@@ -63,11 +63,11 @@ const KEY_INFO = {
   },
   POLYMARKET_EVENTS_LIMIT: {
     desc: "Лимит событий за цикл (автоматически урежется, чтобы не упираться по времени/лимитам).",
-    example: "/set POLYMARKET_EVENTS_LIMIT 700"
+    example: "/set POLYMARKET_EVENTS_LIMIT 3000"
   },
   POLYMARKET_PAGE_SIZE: {
     desc: "Размер страницы /events.",
-    example: "/set POLYMARKET_PAGE_SIZE 50"
+    example: "/set POLYMARKET_PAGE_SIZE 100"
   },
   POLYMARKET_REQ_DELAY_MS: {
     desc: "Задержка между запросами к Polymarket (мс). Больше = безопаснее по лимитам.",
@@ -636,36 +636,36 @@ export async function pollTelegramCommands(config, state, defaults) {
         const name = String(parts[1] || "").trim().toLowerCase();
         const presets = {
           conservative: {
-            VOLUME_SPIKE_USD_30M: 200000,
-            VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.02,
-            BIG_BUY_USD_10M: 200000,
-            BIG_BUY_MIN_PCT_TOTAL_10M: 0.02,
-            PRICE_MOVE_ABS_10M: 0.1,
-            NEW_MARKET_MIN_VOLUME_USD: 200000,
-            MAX_ALERTS_PER_CYCLE: 6,
+            VOLUME_SPIKE_USD_30M: 50000,
+            VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.30,
+            BIG_BUY_USD_10M: 25000,
+            BIG_BUY_MIN_PCT_TOTAL_10M: 0.15,
+            PRICE_MOVE_ABS_10M: 0.10,
+            NEW_MARKET_MIN_VOLUME_USD: 1000,
+            MAX_ALERTS_PER_CYCLE: 5,
             PRICE_CHANGE_ABS_10M: 0.20
           },
           balanced: {
-            VOLUME_SPIKE_USD_30M: 100000,
-            VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.01,
-            BIG_BUY_USD_10M: 100000,
-            BIG_BUY_MIN_PCT_TOTAL_10M: 0.01,
+            VOLUME_SPIKE_USD_30M: 20000,
+            VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.25,
+            BIG_BUY_USD_10M: 10000,
+            BIG_BUY_MIN_PCT_TOTAL_10M: 0.10,
             PRICE_MOVE_ABS_10M: 0.08,
-            NEW_MARKET_MIN_VOLUME_USD: 100000,
+            NEW_MARKET_MIN_VOLUME_USD: 1,
             MAX_ALERTS_PER_CYCLE: 10,
             PRICE_CHANGE_ABS_10M: 0.15
           },
           aggressive: {
-            POLL_INTERVAL_MS: 3000,
-            POLYMARKET_REQ_DELAY_MS: 100,
-            VOLUME_SPIKE_USD_30M: 50000,
-            VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.01,
-            BIG_BUY_USD_10M: 50000,
-            BIG_BUY_MIN_PCT_TOTAL_10M: 0.01,
-            PRICE_MOVE_ABS_10M: 0.06,
-            NEW_MARKET_MIN_VOLUME_USD: 50000,
-            MAX_ALERTS_PER_CYCLE: 15,
-            PRICE_CHANGE_ABS_10M: 0.10
+            POLL_INTERVAL_MS: 10000,
+            POLYMARKET_REQ_DELAY_MS: 0,
+            VOLUME_SPIKE_USD_30M: 5000,
+            VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.10,
+            BIG_BUY_USD_10M: 2000,
+            BIG_BUY_MIN_PCT_TOTAL_10M: 0.05,
+            PRICE_MOVE_ABS_10M: 0.04,
+            NEW_MARKET_MIN_VOLUME_USD: 1,
+            MAX_ALERTS_PER_CYCLE: 20,
+            PRICE_CHANGE_ABS_10M: 0.05
           }
         };
 
