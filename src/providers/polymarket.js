@@ -212,12 +212,26 @@ function toMarket(event, market, config) {
   }
 
   const createdAt = market.createdAt || market.creationDate || "";
+  const title = String(market.question || event.title || market.slug || "").trim();
+  const eventTitle = String(event.title || "").trim();
+
+  if (config.polymarketIgnoreWords) {
+    const ignoreList = config.polymarketIgnoreWords.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+    const tLower = title.toLowerCase();
+    const eLower = eventTitle.toLowerCase();
+    for (const word of ignoreList) {
+      if (tLower.includes(word) || eLower.includes(word)) {
+        return null;
+      }
+    }
+  }
+
   return {
     source: "polymarket",
     id,
     slug: market.slug || "",
-    title: String(market.question || event.title || market.slug || "").trim(),
-    eventTitle: String(event.title || "").trim(),
+    title,
+    eventTitle,
     url: market.slug ? `https://polymarket.com/market/${market.slug}` : "",
     startDate: market.startDate || event.startDate || "",
     endDate,
@@ -245,15 +259,12 @@ export async function getPolymarketMarkets(config, onProgress) {
   }
 
   // Concurrency limit (5 parallel requests is usually safe for Gamma API)
-  // Increased to 20 to handle large market counts (13k+) faster
-  const concurrency = 20;
+  // Increased to 50 to handle large market counts (13k+) in a single batch
+  const concurrency = 50;
 
   for (let i = 0; i < offsets.length; i += concurrency) {
     const chunk = offsets.slice(i, i + concurrency);
 
-    // Check for commands (keepAlive) between batches to stay responsive
-    if (onProgress) await onProgress();
-    
     if (config.debug) {
       console.log(`[poly] fetching batch ${Math.floor(i / concurrency) + 1} (offsets ${chunk.join(",")})`);
     }

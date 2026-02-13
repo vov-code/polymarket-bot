@@ -61,6 +61,10 @@ const KEY_INFO = {
     desc: "Категория событий Polymarket (например Sports, Politics). Оставьте пустым для всех.",
     example: "/set POLYMARKET_CATEGORY Sports"
   },
+  POLYMARKET_IGNORE_WORDS: {
+    desc: "Игнорировать рынки, содержащие эти слова (через запятую).",
+    example: "/set POLYMARKET_IGNORE_WORDS Up or Down, Taylor Swift"
+  },
   POLYMARKET_EVENTS_LIMIT: {
     desc: "Лимит событий за цикл (автоматически урежется, чтобы не упираться по времени/лимитам).",
     example: "/set POLYMARKET_EVENTS_LIMIT 20000"
@@ -165,6 +169,7 @@ const GROUPS = [
       "PROXY_URL",
       "POLYMARKET_BASE_URL",
       "POLYMARKET_CATEGORY",
+      "POLYMARKET_IGNORE_WORDS",
       "POLYMARKET_EVENTS_LIMIT",
       "POLYMARKET_PAGE_SIZE",
       "POLYMARKET_REQ_DELAY_MS",
@@ -636,6 +641,7 @@ export async function pollTelegramCommands(config, state, defaults) {
         const name = String(parts[1] || "").trim().toLowerCase();
         const presets = {
           conservative: {
+            POLYMARKET_PAGE_SIZE: 200,
             VOLUME_SPIKE_USD_30M: 50000,
             VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.30,
             BIG_BUY_USD_10M: 25000,
@@ -647,6 +653,7 @@ export async function pollTelegramCommands(config, state, defaults) {
             PRICE_CHANGE_ABS_10M: 0.20
           },
           balanced: {
+            POLYMARKET_PAGE_SIZE: 500,
             VOLUME_SPIKE_USD_30M: 20000,
             VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.25,
             BIG_BUY_USD_10M: 10000,
@@ -659,6 +666,7 @@ export async function pollTelegramCommands(config, state, defaults) {
           },
           aggressive: {
             POLL_INTERVAL_MS: 10000,
+            POLYMARKET_PAGE_SIZE: 500,
             POLYMARKET_REQ_DELAY_MS: 0,
             VOLUME_SPIKE_USD_30M: 5000,
             VOLUME_SPIKE_MIN_PCT_TOTAL_30M: 0.10,

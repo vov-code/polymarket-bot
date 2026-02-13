@@ -116,8 +116,8 @@ function buildAlertText(meta, signal) {
   return lines.join("\n");
 }
 
-async function runOnce(state, keepAlive) {
-  const markets = await getPolymarketMarkets(config, keepAlive);
+async function runOnce(state) {
+  const markets = await getPolymarketMarkets(config);
   console.log(`[scan] polymarket markets: ${markets.length}`);
 
   const nowTs = Date.now();
@@ -126,15 +126,8 @@ async function runOnce(state, keepAlive) {
 
   const signals = [];
   let newMarketsSeen = 0;
-  let loopCount = 0;
 
   for (const market of markets) {
-    // Yield to command polling every 1000 markets to stay responsive during heavy CPU loops
-    loopCount++;
-    if (keepAlive && loopCount % 5000 === 0) {
-      await keepAlive();
-    }
-
     const isNew = upsertMarketSample(state, market, nowTs, retentionMs);
     if (isNew) {
       newMarketsSeen += 1;
@@ -314,14 +307,10 @@ async function main() {
     }
   }
 
-  const keepAlive = async () => {
-    await pollCommands();
-  };
-
   if (process.env.RUN_ONCE === "1") {
     const startedAt = Date.now();
     await pollCommands();
-    await runOnce(state, keepAlive);
+    await runOnce(state);
     state.meta.bootstrapped = true;
     state.meta.lastCycleMs = Date.now() - startedAt;
     saveState(config.stateFile, state);
@@ -345,7 +334,7 @@ async function main() {
 
     try {
       await pollCommands();
-      await runOnce(state, keepAlive);
+      await runOnce(state);
       state.meta.bootstrapped = true;
       state.meta.lastCycleMs = Date.now() - startedAt;
       await saveStateAsync(config.stateFile, state);

@@ -10,6 +10,7 @@ export const CONFIG_KEYS = [
   "PROXY_URL",
   "POLYMARKET_BASE_URL",
   "POLYMARKET_CATEGORY",
+  "POLYMARKET_IGNORE_WORDS",
   "POLYMARKET_EVENTS_LIMIT",
   "POLYMARKET_PAGE_SIZE",
   "POLYMARKET_REQ_DELAY_MS",
@@ -86,6 +87,7 @@ export function parseAndApply(config, key, rawValue) {
     case "PROXY_URL":
     case "POLYMARKET_BASE_URL":
     case "POLYMARKET_CATEGORY":
+    case "POLYMARKET_IGNORE_WORDS":
       configProxy(config, key, value);
       return value;
     default: {
@@ -123,6 +125,9 @@ function configProxy(config, key, value) {
   }
   if (key === "POLYMARKET_CATEGORY") {
     config.polymarketCategory = value;
+  }
+  if (key === "POLYMARKET_IGNORE_WORDS") {
+    config.polymarketIgnoreWords = value;
   }
 }
 
@@ -262,6 +267,8 @@ export function getEffectiveValue(config, key) {
       return config.polymarketBaseUrl;
     case "POLYMARKET_CATEGORY":
       return config.polymarketCategory;
+    case "POLYMARKET_IGNORE_WORDS":
+      return config.polymarketIgnoreWords;
     case "POLYMARKET_EVENTS_LIMIT":
       return config.polymarketEventsLimit;
     case "POLYMARKET_PAGE_SIZE":
