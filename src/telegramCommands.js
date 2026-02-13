@@ -71,7 +71,7 @@ const KEY_INFO = {
   },
   POLYMARKET_REQ_DELAY_MS: {
     desc: "Задержка между запросами к Polymarket (мс). Больше = безопаснее по лимитам.",
-    example: "/set POLYMARKET_REQ_DELAY_MS 500"
+    example: "/set POLYMARKET_REQ_DELAY_MS 0"
   },
   POLYMARKET_MAX_RETRIES: {
     desc: "Количество ретраев для 429/5xx/timeout.",
@@ -107,19 +107,19 @@ const KEY_INFO = {
   },
   VOLUME_SPIKE_USD_30M: {
     desc: "Volume Spike: прирост объема за 30 минут (USD).",
-    example: "/set VOLUME_SPIKE_USD_30M 100000"
+    example: "/set VOLUME_SPIKE_USD_30M 20000"
   },
   VOLUME_SPIKE_MIN_PCT_TOTAL_30M: {
     desc: "Volume Spike: минимальная доля прироста от общего объема (0.01 = 1%).",
-    example: "/set VOLUME_SPIKE_MIN_PCT_TOTAL_30M 0.01"
+    example: "/set VOLUME_SPIKE_MIN_PCT_TOTAL_30M 0.25"
   },
   BIG_BUY_USD_10M: {
     desc: "Big Move: прирост объема за 10 минут (USD).",
-    example: "/set BIG_BUY_USD_10M 100000"
+    example: "/set BIG_BUY_USD_10M 10000"
   },
   BIG_BUY_MIN_PCT_TOTAL_10M: {
     desc: "Big Move: минимальная доля прироста от общего объема (0.01 = 1%).",
-    example: "/set BIG_BUY_MIN_PCT_TOTAL_10M 0.01"
+    example: "/set BIG_BUY_MIN_PCT_TOTAL_10M 0.10"
   },
   PRICE_MOVE_ABS_10M: {
     desc: "Big Move: минимальное абсолютное изменение цены исхода за 10 минут (0.08 = 8%).",
@@ -127,7 +127,7 @@ const KEY_INFO = {
   },
   NEW_MARKET_MIN_VOLUME_USD: {
     desc: "New Market: мин. объем, чтобы алертить рынок при первом появлении.",
-    example: "/set NEW_MARKET_MIN_VOLUME_USD 100000"
+    example: "/set NEW_MARKET_MIN_VOLUME_USD 1"
   },
   NEW_MARKET_MIN_LIQUIDITY_USD: {
     desc: "New Market: мин. ликвидность, чтобы алертить рынок при первом появлении.",
@@ -135,7 +135,7 @@ const KEY_INFO = {
   },
   NEW_MARKET_MAX_AGE_HOURS: {
     desc: "New Market: игнорировать рынки, созданные более N часов назад (защита от спама старыми рынками).",
-    example: "/set NEW_MARKET_MAX_AGE_HOURS 6"
+    example: "/set NEW_MARKET_MAX_AGE_HOURS 24"
   },
   PRICE_CHANGE_ABS_10M: {
     desc: "Price Pump: изменение цены за 10 минут (0.15 = 15%).",

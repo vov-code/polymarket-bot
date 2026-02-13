@@ -1,4 +1,4 @@
-﻿﻿﻿﻿import fs from "node:fs";
+﻿﻿﻿﻿﻿﻿import fs from "node:fs";
 import path from "node:path";
 
 function loadDotEnv(dotEnvPath = ".env") {
@@ -84,7 +84,7 @@ const config = {
   polymarketCategory: String(process.env.POLYMARKET_CATEGORY || "").trim(),
   polymarketEventsLimit: readNumber("POLYMARKET_EVENTS_LIMIT", 700),
   polymarketPageSize: readNumber("POLYMARKET_PAGE_SIZE", 50),
-  polymarketReqDelayMs: readNumber("POLYMARKET_REQ_DELAY_MS", 500),
+  polymarketReqDelayMs: readNumber("POLYMARKET_REQ_DELAY_MS", 0),
   polymarketMaxRetries: readNumber("POLYMARKET_MAX_RETRIES", 5),
   polymarketRetryBaseMs: readNumber("POLYMARKET_RETRY_BASE_MS", 750),
   polymarketMinLiquidity: readNumber("POLYMARKET_MIN_LIQUIDITY", 0),
@@ -94,19 +94,19 @@ const config = {
   enableVolumeSpike: readBoolean("ENABLE_VOLUME_SPIKE", true),
   enableBigBuy: readBoolean("ENABLE_BIG_BUY", true),
   enableNewMarket: readBoolean("ENABLE_NEW_MARKET", true),
-  volumeSpikeUsd30m: readNumber("VOLUME_SPIKE_USD_30M", 100000),
-  volumeSpikeMinPctOfTotal30m: readNumber("VOLUME_SPIKE_MIN_PCT_TOTAL_30M", 0.01),
-  bigBuyVolumeUsd10m: readNumber("BIG_BUY_USD_10M", 100000),
-  bigBuyMinPctOfTotal10m: readNumber("BIG_BUY_MIN_PCT_TOTAL_10M", 0.01),
+  volumeSpikeUsd30m: readNumber("VOLUME_SPIKE_USD_30M", 20000),
+  volumeSpikeMinPctOfTotal30m: readNumber("VOLUME_SPIKE_MIN_PCT_TOTAL_30M", 0.25),
+  bigBuyVolumeUsd10m: readNumber("BIG_BUY_USD_10M", 10000),
+  bigBuyMinPctOfTotal10m: readNumber("BIG_BUY_MIN_PCT_TOTAL_10M", 0.10),
   priceMoveAbs10m: readNumber("PRICE_MOVE_ABS_10M", 0.08),
   enablePriceChange: readBoolean("ENABLE_PRICE_CHANGE", true),
   priceChangeAbs10m: readNumber("PRICE_CHANGE_ABS_10M", 0.15),
   priceChangeMinVolumeUsd10m: readNumber("PRICE_CHANGE_MIN_VOLUME_USD_10M", 1000),
 
   // New market alert
-  newMarketMinVolumeUsd: readNumber("NEW_MARKET_MIN_VOLUME_USD", 100000),
+  newMarketMinVolumeUsd: readNumber("NEW_MARKET_MIN_VOLUME_USD", 1),
   newMarketMinLiquidityUsd: readNumber("NEW_MARKET_MIN_LIQUIDITY_USD", 0),
-  newMarketMaxAgeHours: readNumber("NEW_MARKET_MAX_AGE_HOURS", 6),
+  newMarketMaxAgeHours: readNumber("NEW_MARKET_MAX_AGE_HOURS", 24),
 
   // State
   stateFile: process.env.STATE_FILE || "data/state.json",
