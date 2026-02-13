@@ -2,7 +2,7 @@
 import http from "node:http";
 import { initHttp, fetchJson } from "./http.js";
 import { getPolymarketMarkets } from "./providers/polymarket.js";
-import { loadState, saveState } from "./state.js";
+import { loadState, saveState, saveStateAsync } from "./state.js";
 import { computeSignalsForMarket, shouldSendAlert, upsertMarketSample } from "./signals.js";
 import { captureDefaults, loadRuntimeConfig, parseAndApply } from "./runtimeConfig.js";
 import { ensureTelegramCommands, pollTelegramCommands } from "./telegramCommands.js";
@@ -116,8 +116,8 @@ function buildAlertText(meta, signal) {
   return lines.join("\n");
 }
 
-async function runOnce(state) {
-  const markets = await getPolymarketMarkets(config);
+async function runOnce(state, keepAlive) {
+  const markets = await getPolymarketMarkets(config, keepAlive);
   console.log(`[scan] polymarket markets: ${markets.length}`);
 
   const nowTs = Date.now();
@@ -126,24 +126,31 @@ async function runOnce(state) {
 
   const signals = [];
   let newMarketsSeen = 0;
+  let loopCount = 0;
 
   for (const market of markets) {
+    // Yield to command polling every 1000 markets to stay responsive during heavy CPU loops
+    loopCount++;
+    if (keepAlive && loopCount % 1000 === 0) {
+      await keepAlive();
+    }
+
     const isNew = upsertMarketSample(state, market, nowTs, retentionMs);
     if (isNew) {
       newMarketsSeen += 1;
     }
 
-    // Check if market is actually new (created recently), not just new to our state
+    const entry = state.markets[market.id];
+
+    // 1. Check for "new market" signal
     const createdTs = market.createdAtTs || 0;
     const ageHours = createdTs > 0 ? (nowTs - createdTs) / 3_600_000 : 999;
-
-    const entry = state.markets[market.id];
-    const hasAlerted = entry?.alerts?.["new_market"];
+    const hasAlertedNew = entry?.alerts?.["new_market"];
 
     if (
       config.enableNewMarket &&
       isBootstrapped &&
-      !hasAlerted &&
+      !hasAlertedNew &&
       market.volumeUsd >= config.newMarketMinVolumeUsd &&
       market.liquidityUsd >= config.newMarketMinLiquidityUsd &&
       ageHours <= config.newMarketMaxAgeHours
@@ -155,25 +162,15 @@ async function runOnce(state) {
         liquidityUsd: market.liquidityUsd
       });
     }
-  }
 
-  for (const market of markets) {
-    const entry = state.markets[market.id];
-    if (!entry) {
-      continue;
-    }
-
+    // 2. Compute other signals (volume, big buy, price change)
     const computed = computeSignalsForMarket(entry, nowTs, config);
 
     if (config.enableVolumeSpike && computed.volumeSpike) {
       signals.push({
         marketId: market.id,
         kind: "volume_spike",
-        deltaUsd: computed.volumeSpike.deltaUsd,
-        pctOfTotal: computed.volumeSpike.pctOfTotal,
-        fromVolumeUsd: computed.volumeSpike.fromVolumeUsd,
-        toVolumeUsd: computed.volumeSpike.toVolumeUsd,
-        score: computed.volumeSpike.deltaUsd
+        ...computed.volumeSpike
       });
     }
 
@@ -317,10 +314,14 @@ async function main() {
     }
   }
 
+  const keepAlive = async () => {
+    await pollCommands();
+  };
+
   if (process.env.RUN_ONCE === "1") {
     const startedAt = Date.now();
     await pollCommands();
-    await runOnce(state);
+    await runOnce(state, keepAlive);
     state.meta.bootstrapped = true;
     state.meta.lastCycleMs = Date.now() - startedAt;
     saveState(config.stateFile, state);
@@ -344,15 +345,15 @@ async function main() {
 
     try {
       await pollCommands();
-      await runOnce(state);
+      await runOnce(state, keepAlive);
       state.meta.bootstrapped = true;
       state.meta.lastCycleMs = Date.now() - startedAt;
-      saveState(config.stateFile, state);
+      await saveStateAsync(config.stateFile, state);
     } catch (error) {
       console.error(`[scan] ${error.message}`);
       state.meta.lastErrorAt = Date.now();
       state.meta.lastError = String(error?.stack || error?.message || error);
-      saveState(config.stateFile, state);
+      await saveStateAsync(config.stateFile, state);
     }
 
     const elapsed = Date.now() - startedAt;

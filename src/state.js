@@ -1,4 +1,4 @@
-﻿import fs from "node:fs";
+﻿﻿import fs from "node:fs";
 import path from "node:path";
 
 export function loadState(stateFile) {
@@ -69,4 +69,14 @@ export function saveState(stateFile, state) {
   const tmp = `${resolved}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(state), "utf8");
   fs.renameSync(tmp, resolved);
+}
+
+export async function saveStateAsync(stateFile, state) {
+  const resolved = path.resolve(process.cwd(), stateFile);
+  const dir = path.dirname(resolved);
+  await fs.promises.mkdir(dir, { recursive: true });
+
+  const tmp = `${resolved}.tmp`;
+  await fs.promises.writeFile(tmp, JSON.stringify(state), "utf8");
+  await fs.promises.rename(tmp, resolved);
 }

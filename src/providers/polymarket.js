@@ -229,7 +229,7 @@ function toMarket(event, market, config) {
   };
 }
 
-export async function getPolymarketMarkets(config) {
+export async function getPolymarketMarkets(config, onProgress) {
   const pageSize = Math.max(1, Math.floor(config.polymarketPageSize));
   const requestedLimit = Math.max(1, Math.floor(config.polymarketEventsLimit));
   const reqDelayMs = config.polymarketReqDelayMs; // Can be 0 now
@@ -245,10 +245,14 @@ export async function getPolymarketMarkets(config) {
   }
 
   // Concurrency limit (5 parallel requests is usually safe for Gamma API)
-  const concurrency = 5;
+  // Increased to 20 to handle large market counts (13k+) faster
+  const concurrency = 20;
 
   for (let i = 0; i < offsets.length; i += concurrency) {
     const chunk = offsets.slice(i, i + concurrency);
+
+    // Check for commands (keepAlive) between batches to stay responsive
+    if (onProgress) await onProgress();
     
     if (config.debug) {
       console.log(`[poly] fetching batch ${Math.floor(i / concurrency) + 1} (offsets ${chunk.join(",")})`);
