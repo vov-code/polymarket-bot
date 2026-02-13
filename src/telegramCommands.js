@@ -135,7 +135,7 @@ const KEY_INFO = {
   },
   NEW_MARKET_MAX_AGE_HOURS: {
     desc: "New Market: игнорировать рынки, созданные более N часов назад (защита от спама старыми рынками).",
-    example: "/set NEW_MARKET_MAX_AGE_HOURS 24"
+    example: "/set NEW_MARKET_MAX_AGE_HOURS 1"
   },
   PRICE_CHANGE_ABS_10M: {
     desc: "Price Pump: изменение цены за 10 минут (0.15 = 15%).",
@@ -642,6 +642,7 @@ export async function pollTelegramCommands(config, state, defaults) {
             BIG_BUY_MIN_PCT_TOTAL_10M: 0.15,
             PRICE_MOVE_ABS_10M: 0.10,
             NEW_MARKET_MIN_VOLUME_USD: 1000,
+            NEW_MARKET_MAX_AGE_HOURS: 1,
             MAX_ALERTS_PER_CYCLE: 5,
             PRICE_CHANGE_ABS_10M: 0.20
           },
@@ -652,6 +653,7 @@ export async function pollTelegramCommands(config, state, defaults) {
             BIG_BUY_MIN_PCT_TOTAL_10M: 0.10,
             PRICE_MOVE_ABS_10M: 0.08,
             NEW_MARKET_MIN_VOLUME_USD: 1,
+            NEW_MARKET_MAX_AGE_HOURS: 1,
             MAX_ALERTS_PER_CYCLE: 10,
             PRICE_CHANGE_ABS_10M: 0.15
           },
@@ -664,6 +666,7 @@ export async function pollTelegramCommands(config, state, defaults) {
             BIG_BUY_MIN_PCT_TOTAL_10M: 0.05,
             PRICE_MOVE_ABS_10M: 0.04,
             NEW_MARKET_MIN_VOLUME_USD: 1,
+            NEW_MARKET_MAX_AGE_HOURS: 1,
             MAX_ALERTS_PER_CYCLE: 20,
             PRICE_CHANGE_ABS_10M: 0.05
           }

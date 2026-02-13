@@ -106,7 +106,7 @@ const config = {
   // New market alert
   newMarketMinVolumeUsd: readNumber("NEW_MARKET_MIN_VOLUME_USD", 1),
   newMarketMinLiquidityUsd: readNumber("NEW_MARKET_MIN_LIQUIDITY_USD", 0),
-  newMarketMaxAgeHours: readNumber("NEW_MARKET_MAX_AGE_HOURS", 24),
+  newMarketMaxAgeHours: readNumber("NEW_MARKET_MAX_AGE_HOURS", 1),
 
   // State
   stateFile: process.env.STATE_FILE || "data/state.json",
