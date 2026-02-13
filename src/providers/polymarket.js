@@ -1,4 +1,4 @@
-﻿﻿import { fetchJson } from "../http.js";
+﻿﻿﻿﻿import { fetchJson } from "../http.js";
 
 import { HttpError } from "../http.js";
 
@@ -232,51 +232,53 @@ function toMarket(event, market, config) {
 export async function getPolymarketMarkets(config) {
   const pageSize = Math.max(1, Math.floor(config.polymarketPageSize));
   const requestedLimit = Math.max(1, Math.floor(config.polymarketEventsLimit));
-  const reqDelayMs = Math.max(0, Math.floor(config.polymarketReqDelayMs));
-
-  // Conservative budget: sequential requests only, enforce a cap per polling interval.
-  const minPerRequestMs = Math.max(250, reqDelayMs);
-  const maxPagesThisCycle = Math.max(1, Math.floor(config.pollIntervalMs / minPerRequestMs));
-  const limit = Math.min(requestedLimit, maxPagesThisCycle * pageSize);
-
-  if (config.debug && limit !== requestedLimit) {
-    console.log(
-      `[poly] capping POLYMARKET_EVENTS_LIMIT from ${requestedLimit} to ${limit} to stay under rate budget (poll=${config.pollIntervalMs}ms, delay=${minPerRequestMs}ms)`
-    );
-  }
+  const reqDelayMs = config.polymarketReqDelayMs; // Can be 0 now
+  
+  // Optimization: Fetch in parallel batches instead of sequential loop
+  const limit = requestedLimit;
   const markets = [];
+  const offsets = [];
 
+  // Generate all needed offsets [0, 50, 100, ...]
   for (let offset = 0; offset < limit; offset += pageSize) {
-    const batchLimit = Math.min(pageSize, limit - offset);
-    let url = `${config.polymarketBaseUrl}/events?active=true&closed=false&limit=${batchLimit}&offset=${offset}`;
-    if (config.polymarketCategory) {
-      url += `&category=${encodeURIComponent(config.polymarketCategory)}`;
+    offsets.push(offset);
+  }
+
+  // Concurrency limit (5 parallel requests is usually safe for Gamma API)
+  const concurrency = 5;
+
+  for (let i = 0; i < offsets.length; i += concurrency) {
+    const chunk = offsets.slice(i, i + concurrency);
+    
+    if (config.debug) {
+      console.log(`[poly] fetching batch ${Math.floor(i / concurrency) + 1} (offsets ${chunk.join(",")})`);
     }
 
-    const events = await fetchGammaJson(url, config);
-
-    if (!Array.isArray(events) || events.length === 0) {
-      break;
-    }
-
-    for (const event of events) {
-      if (!Array.isArray(event.markets)) {
-        continue;
+    const promises = chunk.map(async (offset) => {
+      let url = `${config.polymarketBaseUrl}/events?active=true&closed=false&limit=${pageSize}&offset=${offset}`;
+      if (config.polymarketCategory) {
+        url += `&category=${encodeURIComponent(config.polymarketCategory)}`;
       }
+      return fetchGammaJson(url, config);
+    });
 
-      for (const market of event.markets) {
-        if (!market || market.closed || market.active === false) {
-          continue;
-        }
+    const results = await Promise.all(promises);
 
-        const parsed = toMarket(event, market, config);
-        if (parsed) {
-          markets.push(parsed);
+    for (const events of results) {
+      if (!Array.isArray(events)) continue;
+      for (const event of events) {
+        if (!Array.isArray(event.markets)) continue;
+        for (const market of event.markets) {
+          if (!market || market.closed || market.active === false) continue;
+          const parsed = toMarket(event, market, config);
+          if (parsed) markets.push(parsed);
         }
       }
     }
 
-    if (events.length < batchLimit) {
+    // If the last page in this batch was empty or incomplete, we are done
+    const lastResult = results[results.length - 1];
+    if (Array.isArray(lastResult) && lastResult.length < pageSize) {
       break;
     }
 
